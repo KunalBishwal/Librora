@@ -2,18 +2,13 @@
 const Book = require('../models/Book');
 const Review = require('../models/Review');
 
-// =======================================================
-// @desc    Get all books with pagination + search + avg rating
-// @route   GET /api/books?page=1&search=keyword
-// @access  Public
-// =======================================================
 const getBooks = async (req, res) => {
   const pageSize = 5;
   const page = Number(req.query.page) || 1;
   const search = req.query.search ? req.query.search.trim() : '';
 
   try {
-    // Build search filter
+
     let filter = {};
     if (search) {
       const regex = new RegExp(search, 'i'); // case-insensitive search
@@ -28,13 +23,13 @@ const getBooks = async (req, res) => {
 
     const count = await Book.countDocuments(filter);
 
-    // Fetch paginated books
+ 
     const books = await Book.find(filter)
       .limit(pageSize)
       .skip(pageSize * (page - 1))
       .lean();
 
-    // Aggregate reviews to compute average rating and review count
+
     const bookIds = books.map((b) => b._id);
     const agg = await Review.aggregate([
       { $match: { book: { $in: bookIds } } },
@@ -47,7 +42,6 @@ const getBooks = async (req, res) => {
       },
     ]);
 
-    // Convert aggregation array to map for quick lookup
     const aggMap = {};
     agg.forEach((a) => {
       aggMap[a._id.toString()] = {
@@ -56,7 +50,7 @@ const getBooks = async (req, res) => {
       };
     });
 
-    // Merge metadata with books
+
     const booksWithMeta = books.map((b) => {
       const meta = aggMap[b._id.toString()] || {
         averageRating: 0,
@@ -81,11 +75,6 @@ const getBooks = async (req, res) => {
   }
 };
 
-// =======================================================
-// @desc    Get single book with reviews and avg rating
-// @route   GET /api/books/:id
-// @access  Public
-// =======================================================
 const getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id).lean();
@@ -111,11 +100,6 @@ const getBookById = async (req, res) => {
   }
 };
 
-// =======================================================
-// @desc    Add a new book
-// @route   POST /api/books
-// @access  Private
-// =======================================================
 const addBook = async (req, res) => {
   const { title, author, description, genre, year } = req.body;
 
@@ -137,11 +121,7 @@ const addBook = async (req, res) => {
   }
 };
 
-// =======================================================
-// @desc    Update a book (only creator can)
-// @route   PUT /api/books/:id
-// @access  Private
-// =======================================================
+
 const updateBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
@@ -166,11 +146,6 @@ const updateBook = async (req, res) => {
   }
 };
 
-// =======================================================
-// @desc    Delete a book and its reviews (only creator)
-// @route   DELETE /api/books/:id
-// @access  Private
-// =======================================================
 const deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);

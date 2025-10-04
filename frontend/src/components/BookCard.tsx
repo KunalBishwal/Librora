@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 
 interface BookCardProps {
-  // accept both forms: backend might send `_id` or `id`
+ 
   _id?: string;
   id?: string;
   title: string;

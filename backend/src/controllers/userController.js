@@ -2,14 +2,10 @@
 const Book = require('../models/Book');
 const Review = require('../models/Review');
 
-// @desc    Get books added by the logged-in user
-// @route   GET /api/users/my-books
-// @access  Private
 const getMyBooks = async (req, res) => {
   try {
     const books = await Book.find({ addedBy: req.user._id });
     
-    // Optionally, add average ratings to each book as well
     const booksWithRatings = await Promise.all(
       books.map(async (book) => {
         const reviews = await Review.find({ book: book._id });
@@ -32,9 +28,6 @@ const getMyBooks = async (req, res) => {
   }
 };
 
-// @desc    Get reviews written by the logged-in user
-// @route   GET /api/users/my-reviews
-// @access  Private
 const getMyReviews = async (req, res) => {
   try {
     const reviews = await Review.find({ user: req.user._id }).populate('book', 'title');
